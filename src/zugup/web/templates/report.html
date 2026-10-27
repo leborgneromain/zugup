@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block head %}<link rel="stylesheet" href="/static/report.css">{% endblock %}
+{% block body %}
+<p class="lead">{{ t('report.lead') }}</p>
+{% for s in sections %}
+<section class="card report">
+<header>
+<h2>{{ s.speed|capitalize }}</h2>
+<p>{{ t('report.summary', games=t('report.games', count=s.games), moves=t('report.moves', count=s.moves), rate=s.serious_rate|pct) }}</p>
+</header>
+{% set axes = s.radar %}
+{% set helps = {
+"winning": t('report.help.winning'),
+"time": t('report.help.time'),
+"losing": t('report.help.losing')
+} %}
+<div class="overview">
+<div class="radar-wrap">
+<svg class="radar" viewBox="0 0 360 300" role="img" aria-label="{{ t('report.radar_label') }}">
+{% for ring in RADAR_RINGS %}<polygon class="ring" points="{{ radar_polygon(axes, ring) }}"/>{% endfor %}
+{% for a in axes %}{% set edge = radar_point(loop.index0, axes|length, 100) %}<line class="spoke" x1="180" y1="150" x2="{{ edge[0] }}" y2="{{ edge[1] }}"/>{% endfor %}
+{% if axes|selectattr('peer_score', 'none')|list|length == 0 %}<polygon class="shape peer" points="{{ radar_polygon(axes, none, 'peer_score') }}"/>{% endif %}
+{% if axes|selectattr('score', 'none')|list|length == 0 %}<polygon class="shape" points="{{ radar_polygon(axes) }}"/>{% endif %}
+{% for a in axes %}{% set p = radar_point(loop.index0, axes|length, a.score) %}{% set l = radar_point(loop.index0, axes|length, 100, 1.28) %}
+{% set q = radar_point(loop.index0, axes|length, a.peer_score) %}{% if a.peer_score is not none %}<circle class="dot peer" cx="{{ q[0] }}" cy="{{ q[1] }}" r="3.5"/>{% endif %}
+{% if a.score is not none %}<circle class="dot" cx="{{ p[0] }}" cy="{{ p[1] }}" r="4"/>{% endif %}
+{% endfor %}
+</svg>
+{% for a in axes %}{% set i = loop.index0 %}{% for kind in ('score', 'peer_score') if a[kind] is not none %}{% set p = radar_point(i, axes|length, a[kind]) %}
+<span class="point {{ 'peer' if kind == 'peer_score' else 'you' }}" style="left: {{ (p[0] / 3.6)|round(1) }}%; top: {{ (p[1] / 3)|round(1) }}%" tabindex="0" role="note"><span class="tip"><span class="you-score">{{ t('report.you_score', score=(a.score|score) if a.score is not none else '-') }}</span>{% if a.peer_score is not none %}<br><span class="peer-score">{{ t('report.peers_score', score=a.peer_score|score) }}</span>{% endif %}</span></span>
+{% endfor %}{% endfor %}
+{% for a in axes %}{% set l = radar_point(loop.index0, axes|length, 100, 1.28) %}{% set side = 'start' if l[0] > 190 else ('end' if l[0] < 170 else 'middle') %}
+<div class="axis {{ side }}" style="left: {{ (l[0] / 3.6)|round(1) }}%; top: {{ (l[1] / 3)|round(1) }}%">
+<span class="name">{{ t('axis.' ~ a.key) }}{% if a.key in helps %}<span class="info" tabindex="0" role="note">i<span class="tip">{{ helps[a.key] }}</span></span>{% endif %}</span>
+{% if a.score is none %}<span class="value">-</span>{% endif %}
+</div>
+{% endfor %}
+</div>
+{% if s.peer_games %}<p class="legend"><span class="swatch you"></span> {{ t('report.you') }} <span class="swatch peers"></span> {{ t('report.peers_legend', games=t('report.games', count=s.peer_games)) }}</p>{% endif %}
+<p class="muted note">{{ t('report.note') }}</p>
+</div>
+{% if s.groups %}
+<p class="legend"><span class="swatch above"></span> {{ t('report.legend.above') }} <span class="swatch below"></span> {{ t('report.legend.below') }} <span class="swatch neutral"></span> {{ t('report.legend.neutral') }}</p>
+<table>
+<thead><tr><th>{{ t('report.col.category') }}</th><th>{{ t('report.col.value') }}</th><th>{{ t('report.col.serious') }}</th><th>{{ t('report.col.gap') }}</th><th>{{ t('report.col.games') }}</th><th>{{ t('report.col.loss') }} <span class="info" tabindex="0" role="note">i<span class="tip">{{ t('report.loss_help') }}</span></span></th></tr></thead>
+<tbody>
+{% for g in s.groups %}
+{% set gap = (g.rate - g.overall) * 100 %}
+<tr class="{{ 'neutral' if gap|abs < 1 else ('above' if gap > 0 else 'below') }}">
+<td>{% if loop.first or loop.previtem.column != g.column %}{{ t('dimension.' ~ g.column) }}{% endif %}</td>
+<td>{{ g.value|value_label }}</td>
+<td>{{ g.rate|pct }} <span class="muted">({{ g.serious }}/{{ g.moves }})</span></td>
+<td>{{ gap|gap_label }}</td>
+<td>{{ g.games }}</td>
+<td>{% if g.avg_cp_loss is none %}-{% else %}{{ "%.0f"|format(g.avg_cp_loss) }} cp{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<p class="muted note">{{ t('report.groups_note', rate=s.serious_rate|pct) }}</p>
+{% else %}
+<p class="muted">{{ t('report.no_groups') }}</p>
+{% endif %}
+</section>
+{% else %}
+<section class="card soon"><h2>{{ t('common.no_data') }}</h2><p>{{ t('report.empty') }}</p></section>
+{% endfor %}
+{% endblock %}

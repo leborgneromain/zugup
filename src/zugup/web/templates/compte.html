@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block head %}<link rel="stylesheet" href="/static/compte.css">{% endblock %}
+{% block body %}
+<p class="lead">{{ t('compte.lead') }}</p>
+<div class="stack">
+<section class="card account" data-source="resume">
+<h2>{{ t('compte.analysis') }}</h2>
+<p class="muted hint">{% if todo %}{{ t('compte.todo', count=todo) }}{% else %}{{ t('compte.all_analyzed') }}{% endif %}</p>
+<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden><span></span></div>
+<p class="muted sync-status" role="status"></p>
+<button type="button" class="secondary sync-refresh" hidden>{{ t('common.refresh') }}</button>
+<h3>{{ t('compte.depth') }}</h3>
+<div id="pref-depth" class="choices" role="group" aria-label="{{ t('compte.depth') }}">
+{% for depth in depths %}<button type="button" class="secondary" data-depth="{{ depth }}" aria-pressed="{{ 'true' if depth == prefs.depth else 'false' }}">{% if depth == 16 %}{{ t('compte.depth_default', depth=depth) }}{% else %}{{ depth }}{% endif %}</button>
+{% endfor %}
+</div>
+<p class="muted hint">{{ t('compte.depth_hint') }}</p>
+<p id="depth-status" class="muted" role="status"></p>
+{% if not standalone %}
+<h3>{{ t('compte.stockfish') }}</h3>
+<label>{{ t('compte.stockfish_label') }} <input type="text" id="pref-stockfish" value="{{ prefs.stockfish_path }}" placeholder="{{ engine }}" autocomplete="off" spellcheck="false"></label>
+<p class="muted hint">{% if engine %}{{ t('compte.stockfish_found', path=engine) }}{% else %}{{ t('compte.stockfish_missing') }}{% endif %}</p>
+<p class="muted hint">{{ t('compte.stockfish_hint') }}</p>
+<p id="stockfish-status" class="muted" role="status"></p>
+{% endif %}
+</section>
+<section class="card">
+<h2>{{ t('compte.accounts') }}</h2>
+<fieldset id="pref-accounts">
+{% for key, label in (("lichess", "Lichess"), ("chesscom", "Chess.com")) %}
+{% set info = stats[key] %}
+<div class="account" data-source="{{ key }}">
+{% if key == "lichess" %}
+<div class="connection">
+<span>{{ label }}</span>
+{% if accounts.lichess %}<span class="connected">{{ t('compte.connected', name=accounts.lichess) }}</span> <button type="button" class="secondary" id="lichess-disconnect">{{ t('compte.disconnect') }}</button>{% else %}<a class="secondary button-link" href="/auth/lichess">{{ t('compte.connect_lichess') }}</a>{% endif %}
+</div>
+{% if lichess_notice %}<p class="muted" role="status">{{ lichess_notice }}</p>{% endif %}
+<p class="muted hint">{{ t('compte.lichess_hint') }}</p>
+{% else %}
+<label>{{ label }} <input type="text" name="{{ key }}" value="{{ accounts[key] }}" maxlength="30" autocomplete="off" spellcheck="false"></label>
+{% endif %}
+<p class="muted hint">{% if info.games %}{{ t('compte.imported', count=info.games, last=info.last|local_date) }} {{ t('compte.analyzed', count=counts[key].analyzed, pending=counts[key].pending) }}{% else %}{{ t('compte.none_imported') }}{% endif %}</p>
+{% if key != "lichess" or accounts.lichess %}<button type="button" class="secondary sync-button" data-source="{{ key }}">{{ t('compte.import_from', source=label) }}</button>{% endif %}
+<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" hidden><span></span></div>
+<p class="muted sync-status" role="status"></p>
+<button type="button" class="secondary sync-refresh" hidden>{{ t('common.refresh') }}</button>
+</div>
+{% endfor %}
+</fieldset>
+<fieldset id="pref-import-speeds">
+<legend>{{ t('compte.import_speeds') }}</legend>
+{% for speed in all_speeds %}<label class="check"><input type="checkbox" value="{{ speed }}"{% if speed in prefs.import_speeds %} checked{% endif %}> {{ speed|capitalize }}</label>
+{% endfor %}
+</fieldset>
+<label>{{ t('compte.limit') }} <input type="number" id="pref-limit" min="1" max="500" value="{{ prefs.import_limit }}"></label>
+<p class="muted hint">{{ t('compte.limit_hint') }}</p>
+<p id="settings-status" class="muted" role="status"></p>
+</section>
+<section class="card">
+<h2>{{ t('compte.display') }}</h2>
+<fieldset id="pref-speeds">
+<legend>{{ t('compte.shown_speeds') }}</legend>
+{% for speed in all_speeds %}<label class="check"><input type="checkbox" value="{{ speed }}"{% if speed in prefs.speeds %} checked{% endif %}> {{ speed|capitalize }}</label>
+{% endfor %}
+</fieldset>
+<p id="speeds-status" class="muted" role="status"></p>
+<h3>{{ t('compte.theme') }}</h3>
+<div id="pref-theme" class="choices" role="group" aria-label="{{ t('compte.theme') }}">
+{% for theme, label in (("dark", t('compte.theme.dark')), ("light", t('compte.theme.light'))) %}<button type="button" class="secondary" data-theme="{{ theme }}" aria-pressed="{{ 'true' if theme == prefs.theme else 'false' }}">{{ label }}</button>
+{% endfor %}
+</div>
+<h3>{{ t('compte.language') }}</h3>
+<div id="pref-language" class="choices" role="group" aria-label="{{ t('compte.language') }}">
+{% for code, label in (("fr", "Français"), ("en", "English")) %}<button type="button" class="secondary" data-language="{{ code }}" aria-pressed="{{ 'true' if code == prefs.language else 'false' }}">{{ label }}</button>
+{% endfor %}
+</div>
+</section>
+{% if standalone %}
+<section class="card">
+<h2>{{ t('compte.application') }}</h2>
+<p class="muted hint">{{ t('compte.quit_hint') }}</p>
+<button type="button" class="secondary" id="quit-button">{{ t('compte.quit') }}</button>
+<p id="quit-status" class="muted" role="status"></p>
+</section>
+{% endif %}
+<section class="card danger-zone">
+<h2>{{ t('compte.danger') }}</h2>
+<p class="muted hint">{{ t('compte.danger_hint') }}</p>
+<button type="button" id="reset-button" class="danger" data-games="{{ total }}">{{ t('compte.reset') }}</button>
+<p id="reset-status" class="muted" role="status"></p>
+</section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="/static/compte.js"></script>
+{% endblock %}

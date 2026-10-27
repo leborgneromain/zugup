@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="{{ lang }}" data-theme="{{ prefs.theme }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZugUp - {{ title }}</title>
+<link rel="stylesheet" href="/static/site.css">
+{% block head %}{% endblock %}
+<script id="messages" type="application/json">{{ js_messages|tojson }}</script>
+</head>
+<body>
+<nav class="menu">
+<a class="brand" href="/entrainement">ZugUp</a>
+<ul>
+{% for key, label, href in MENU %}
+<li><a href="{{ href }}"{% if key == active %} class="active" aria-current="page"{% endif %}>{{ label }}</a></li>
+{% endfor %}
+</ul>
+</nav>
+<header class="topbar">
+<a class="profile" href="/compte" title="{{ t('profile.title') }}"{% if active == "compte" %} aria-current="page"{% endif %}>
+<span class="avatar">{{ profile_initial }}</span><span class="profile-name">{{ profile_name }}</span>
+</a>
+</header>
+<main class="content">
+<h1>{{ title }}</h1>
+{% block body %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

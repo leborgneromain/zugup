@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="/static/vendor/cm-chessboard/assets/chessboard.css">
+<link rel="stylesheet" href="/static/training.css">
+{% endblock %}
+{% block body %}
+<section class="card training" id="training">
+<div class="main">
+<div class="filters">
+<div id="speed-filter" role="group" aria-label="{{ t('common.speeds') }}">
+{% for speed in prefs.speeds %}<button type="button" class="secondary" data-speed="{{ speed }}" aria-pressed="true">{{ speed|capitalize }}</button>
+{% endfor %}
+</div>
+<p id="counter"></p>
+</div>
+<p id="info"></p>
+<div id="board"></div>
+<div class="game-row">
+<p id="game"></p>
+<button id="replay" class="secondary" type="button" aria-pressed="false">{{ t('training.replay') }}</button>
+</div>
+<p id="feedback"></p>
+<button id="next" hidden>{{ t('training.next') }}</button>
+</div>
+<aside id="replay-panel" hidden>
+<div id="replay-controls">
+<button id="replay-prev" class="secondary" type="button">&larr;</button>
+<span id="replay-label"></span>
+<button id="replay-next" class="secondary" type="button">&rarr;</button>
+</div>
+<ol id="moves" aria-label="{{ t('training.moves') }}"></ol>
+</aside>
+</section>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="/static/training.js"></script>
+{% endblock %}

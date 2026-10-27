@@ -1,0 +1,10 @@
+#!/bin/sh
+src="$0"
+while [ -L "$src" ]; do
+  dir="$(cd "$(dirname "$src")" && pwd)"
+  src="$(readlink "$src")"
+  case "$src" in /*) ;; *) src="$dir/$src" ;; esac
+done
+root="$(cd "$(dirname "$src")" && pwd)"
+cd "$root" || exit 1
+exec "$root/.venv/bin/python" -m zugup "$@"

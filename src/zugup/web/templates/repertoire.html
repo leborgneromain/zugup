@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="/static/vendor/cm-chessboard/assets/chessboard.css">
+<link rel="stylesheet" href="/static/repertoire.css">
+{% endblock %}
+{% block body %}
+<section class="card repertoire">
+<div class="filters">
+<div id="color-filter" role="group" aria-label="{{ t('repertoire.color') }}">
+<button type="button" class="secondary" data-color="white" aria-pressed="true">{{ t('repertoire.white') }}</button>
+<button type="button" class="secondary" data-color="black" aria-pressed="false">{{ t('repertoire.black') }}</button>
+</div>
+<div id="speed-filter" role="group" aria-label="{{ t('common.speeds') }}">
+{% for speed in prefs.speeds %}<button type="button" class="secondary" data-speed="{{ speed }}" aria-pressed="true">{{ speed|capitalize }}</button>
+{% endfor %}
+</div>
+</div>
+<div class="tree">
+<div class="left">
+<div id="board"></div>
+<div id="nav">
+<button type="button" id="prev" class="secondary" aria-label="{{ t('repertoire.prev') }}" title="{{ t('repertoire.prev_title') }}">&larr;</button>
+<button type="button" id="forward" class="secondary" aria-label="{{ t('repertoire.next') }}" title="{{ t('repertoire.next_title') }}">&rarr;</button>
+</div>
+<p id="path"></p>
+</div>
+<div class="right">
+<p id="summary" class="muted"></p>
+<p id="legend" class="legend" hidden><span class="swatch above"></span> {{ t('repertoire.legend.above') }} <span class="swatch below"></span> {{ t('repertoire.legend.below') }} <span class="swatch neutral"></span> {{ t('repertoire.legend.neutral') }}</p>
+<table id="moves-table" hidden>
+<thead><tr><th>{{ t('repertoire.col.move') }}</th><th>{{ t('repertoire.col.games') }}</th><th>{{ t('repertoire.col.results') }}</th><th title="{{ t('repertoire.later_help') }}">{{ t('repertoire.col.later') }}</th></tr></thead>
+<tbody id="moves-body"></tbody>
+</table>
+<p id="empty" class="muted" hidden></p>
+</div>
+</div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="/static/repertoire.js"></script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block head %}<link rel="stylesheet" href="/static/coach.css">{% endblock %}
+{% block body %}
+<div class="filters">
+<nav class="speeds" aria-label="{{ t('common.speeds') }}">
+{% for speed in speeds %}<a class="secondary" href="/coach?speed={{ speed }}"{% if speed == plan.speed %} aria-pressed="true"{% endif %}>{{ speed|capitalize }}</a>{% endfor %}
+</nav>
+<p class="muted">{{ t('coach.week', week=plan.week) }}</p>
+</div>
+{% if plan.tasks %}
+<section class="card plan">
+<h2>{{ t('coach.plan') }}</h2>
+<ul class="tasks" data-speed="{{ plan.speed }}">
+{% for t in plan.tasks %}
+<li class="task{% if t.done %} done{% endif %}">
+{% if t.kind == 'manual' %}
+<label><input type="checkbox" data-task="{{ t.key }}"{% if t.done %} checked{% endif %}> <span class="title">{{ t.title }}</span></label>
+{% else %}
+<span class="title">{{ t.title }}</span>
+<span class="progress"><progress max="{{ t.target }}" value="{{ t.progress }}"></progress> {{ t.progress }}/{{ t.target }}</span>
+{% endif %}
+<p class="detail muted">{{ t.detail }}</p>
+</li>
+{% endfor %}
+</ul>
+</section>
+<section class="card advice">
+<h2>{{ t('coach.advice') }}</h2>
+{% for line in plan.advice.split('\n') %}<p>{{ line }}</p>{% endfor %}
+</section>
+{% else %}
+<section class="card soon"><h2>{{ t('common.no_data') }}</h2><p>{{ t('coach.empty') }}</p></section>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/coach.js"></script>{% endblock %}

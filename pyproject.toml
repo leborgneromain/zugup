@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zugup"
+version = "0.1.0"
+requires-python = ">=3.11"
+license = "GPL-3.0-only"
+dependencies = [
+    "chess",
+    "flask",
+    "pandas",
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+build = ["pyinstaller"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
